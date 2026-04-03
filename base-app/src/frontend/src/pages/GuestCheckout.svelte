@@ -7,7 +7,7 @@
         zip = "";
     let error = "";
     let loading = false;
-    let cartItems = []; 
+    let cartItems = [];
 
     async function handleGuestCheckout() {
         error = "";
@@ -52,7 +52,9 @@
 
             if (res.ok) {
                 localStorage.removeItem("cart"); // Clear cart
-                navigate(`guest/success?token=${data.access_token}&email=${data.guest_email}`);
+                navigate(
+                    `guest/success?token=${data.access_token}&email=${data.guest_email}`,
+                );
             } else {
                 error = data.error || "Failed to place order";
             }
@@ -82,6 +84,7 @@
                 type="email"
                 class="form-control"
                 bind:value={email}
+                data-testid="guest-email"
                 required
                 placeholder="you@example.com"
             />
@@ -93,13 +96,20 @@
                 type="text"
                 class="form-control"
                 bind:value={name}
+                data-testid="guest-name"
+                placeholder="Enter your name"
                 required
             />
         </div>
 
         <div class="mb-3">
             <label>Address</label>
-            <textarea class="form-control" bind:value={address} required
+            <textarea
+                class="form-control"
+                bind:value={address}
+                required
+                data-testid="guest-address"
+                placeholder="Enter your address"
             ></textarea>
         </div>
 
@@ -110,6 +120,7 @@
                     class="form-control"
                     bind:value={city}
                     placeholder="City"
+                    data-testid="guest-city"
                     required
                 />
             </div>
@@ -119,6 +130,7 @@
                     class="form-control"
                     bind:value={zip}
                     placeholder="ZIP"
+                    data-testid="guest-zip"
                     required
                 />
             </div>
@@ -128,6 +140,7 @@
             type="submit"
             class="btn btn-success btn-lg mt-4"
             disabled={loading}
+            data-testid="guest-submit"
         >
             {#if loading}Processing...{:else}Place Order{/if}
         </button>

@@ -20,8 +20,6 @@
   let page = "home";
   let currentUser = null;
   let loading = true;
-
-  // Helper to extract clean page name from path (ignores query params)
   function getPageFromPath() {
     const path = window.location.pathname.slice(1) || "home";
     return path.split("?")[0];

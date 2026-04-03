@@ -8,7 +8,7 @@
   let product = null;
   let relatedProducts = [];
   let fbtProducts = [];
-  let reviews = []; 
+  let reviews = [];
   let loading = true;
   let error = "";
   let productId = null;
@@ -35,7 +35,7 @@
 
   async function fetchProduct() {
     loading = true;
-    submitError = ""; 
+    submitError = "";
     try {
       const res = await fetch(`/api/products/${productId}/`);
       if (res.ok) {
@@ -75,13 +75,19 @@
       try {
         const res = await fetch("/api/cart/", {
           method: "POST",
-          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
           credentials: "include",
           body: JSON.stringify({ product_id: product.id, quantity: 1 }),
         });
         const data = await res.json();
-        if (res.ok) alert("✅ Added to cart successfully!");
-        else alert("❌ Failed: " + (data.error || "Unknown error"));
+        if (res.ok) {
+          window.dispatchEvent(new CustomEvent("cart-updated"));
+          navigate("cart");
+          alert("✅ Added to cart successfully!");
+        } else alert("❌ Failed: " + (data.error || "Unknown error"));
       } catch (e) {
         console.error(e);
         alert("❌ Network error.");
@@ -90,26 +96,49 @@
       let cart = JSON.parse(localStorage.getItem("cart") || "[]");
       const existing = cart.find((item) => item.product_id === product.id);
       if (existing) existing.quantity += 1;
-      else cart.push({ product_id: product.id, quantity: 1, price: product.price });
+      else
+        cart.push({
+          product_id: product.id,
+          quantity: 1,
+          price: product.price,
+        });
       localStorage.setItem("cart", JSON.stringify(cart));
       alert("Added to guest cart!");
+      window.dispatchEvent(new CustomEvent("cart-updated"));
+      navigate("cart");
     }
   }
 
   async function submitReview() {
     submitError = "";
     submitSuccess = "";
-    if (!currentUser) { submitError = "Please login to review."; return; }
-    if (newRating === 0) { submitError = "Please select a star rating."; return; }
-    if (newComment.trim().length < 10) { submitError = "Comment must be at least 10 characters."; return; }
-    if (newComment.length > 500) { submitError = "Comment must be under 500 characters."; return; }
+    if (!currentUser) {
+      submitError = "Please login to review.";
+      return;
+    }
+    if (newRating === 0) {
+      submitError = "Please select a star rating.";
+      return;
+    }
+    if (newComment.trim().length < 10) {
+      submitError = "Comment must be at least 10 characters.";
+      return;
+    }
+    if (newComment.length > 500) {
+      submitError = "Comment must be under 500 characters.";
+      return;
+    }
 
     try {
       const res = await fetch("/api/reviews/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ product: product.id, rating: newRating, comment: newComment }),
+        body: JSON.stringify({
+          product: product.id,
+          rating: newRating,
+          comment: newComment,
+        }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -132,13 +161,13 @@
   {#if loading}
     <div class="text-center"><div class="spinner-border"></div></div>
 
-  <!-- 2. ERROR STATE -->
+    <!-- 2. ERROR STATE -->
   {:else if error}
     <div class="alert alert-danger">{error}</div>
-    <button class="btn btn-secondary" on:click={() => navigate("home")}>Back to Home</button>
-
+    <button class="btn btn-secondary" on:click={() => navigate("home")}
+      >Back to Home</button
+    >
   {:else if product}
-    
     <div class="row">
       <div class="col-md-6">
         <h1 class="display-4">{product.title}</h1>
@@ -147,9 +176,15 @@
 
         <div class="mb-3" data-testid="average-rating">
           <StarRating rating={Math.round(product.average_rating) || 0} />
-          <span class="ms-2 text-muted">({product.review_count || 0} reviews)</span>
+          <span class="ms-2 text-muted"
+            >({product.review_count || 0} reviews)</span
+          >
         </div>
-        <button class="btn btn-primary btn-lg" on:click={addToCart} data-testid="add-to-cart-button">
+        <button
+          class="btn btn-primary btn-lg"
+          on:click={addToCart}
+          data-testid="add-to-cart-button"
+        >
           Add to Cart
         </button>
       </div>
@@ -159,29 +194,64 @@
 
     <div data-testid="review-section">
       <h3 class="mb-4">Customer Reviews</h3>
-
+      <div>
+        <StarRating rating={Math.round(product.average_rating) || 0} />
+        <span class="ms-2 text-muted"
+          >({product.review_count || 0} reviews)</span
+        >
+      </div>
       {#if currentUser && currentUser.id}
-        <div class="card p-3 mb-4 bg-light">
+        <div class="card p-3 mb-4 bg-light" data-testid="review-form">
           <h5>Write a Review</h5>
-          {#if submitError}<div class="alert alert-danger">{submitError}</div>{/if}
-          {#if submitSuccess}<div class="alert alert-success">{submitSuccess}</div>{/if}
+          {#if submitError}<div
+              class="alert alert-danger"
+              data-testid="review-error"
+            >
+              {submitError}
+            </div>{/if}
+          {#if submitSuccess}<div
+              class="alert alert-success"
+              data-testid="review-success"
+            >
+              {submitSuccess}
+            </div>{/if}
 
           <div class="mb-2">
             <label>Your Rating:</label>
-            <StarRating rating={newRating} interactive={true} onRate={(r) => (newRating = r)} />
+            <StarRating
+              rating={newRating}
+              interactive={true}
+              onRate={(r) => (newRating = r)}
+            />
           </div>
-          <textarea class="form-control mb-2" rows="3" bind:value={newComment} placeholder="Min 10 chars..."></textarea>
-          <button class="btn btn-success" on:click={submitReview}>Submit Review</button>
+          <textarea
+            class="form-control mb-2"
+            rows="3"
+            bind:value={newComment}
+            data-testid="review-comment"
+            placeholder="Min 10 chars..."
+          ></textarea>
+          <button
+            class="btn btn-success"
+            on:click={submitReview}
+            data-testid="review-submit">Submit Review</button
+          >
         </div>
       {:else}
         <div class="alert alert-warning">
-          Please <a href="/login" on:click|preventDefault={() => navigate("login")}>login</a> to write a review.
+          Please <a
+            href="/login"
+            on:click|preventDefault={() => navigate("login")}>login</a
+          > to write a review.
         </div>
       {/if}
 
       <div class="list-group">
         {#each reviews as review}
-          <div class="list-group-item list-group-item-action" data-testid="review-item">
+          <div
+            class="list-group-item list-group-item-action"
+            data-testid="review-item"
+          >
             <div class="d-flex w-100 justify-content-between align-items-start">
               <div>
                 <h5 class="mb-1">{review.username || "Anonymous"}</h5>
@@ -190,7 +260,9 @@
                 </div>
                 <p class="mb-1">{review.comment}</p>
               </div>
-              <small class="text-muted">{new Date(review.created_at).toLocaleDateString()}</small>
+              <small class="text-muted"
+                >{new Date(review.created_at).toLocaleDateString()}</small
+              >
             </div>
           </div>
         {:else}
@@ -209,7 +281,12 @@
         <div class="row">
           {#each fbtProducts as item}
             <div class="col-md-3 col-6 mb-3">
-              <div class="card h-100" on:click={() => navigate(`product?id=${item.id}`)} style="cursor:pointer">
+              <div
+                class="card h-100"
+                data-testid="fbt-product-card"
+                on:click={() => navigate(`product?id=${item.id}`)}
+                style="cursor:pointer"
+              >
                 <div class="card-body">
                   <h6 class="card-title">{item.title}</h6>
                   <p class="card-text text-primary">${item.price}</p>
@@ -229,7 +306,12 @@
         <div class="row">
           {#each relatedProducts as item}
             <div class="col-md-3 col-6 mb-3">
-              <div class="card h-100" on:click={() => navigate(`product?id=${item.id}`)} style="cursor:pointer">
+              <div
+                class="card h-100"
+                on:click={() => navigate(`product?id=${item.id}`)}
+                style="cursor:pointer"
+                data-testid="related-product-card"
+              >
                 <div class="card-body">
                   <h6 class="card-title">{item.title}</h6>
                   <p class="small text-muted">{item.category}</p>
@@ -241,6 +323,5 @@
         </div>
       {/if}
     </section>
-
   {/if}
 </div>

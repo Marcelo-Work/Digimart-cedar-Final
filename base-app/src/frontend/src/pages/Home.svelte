@@ -4,19 +4,38 @@
   let products = [];
   let loading = true;
   let searchQuery = "";
-
+  let filteredProducts = [];
+  function applyFilter(query) {
+    const q = query.toLowerCase().trim();
+    if (!q) {
+      filteredProducts = products;
+    } else {
+      filteredProducts = products.filter(
+        (p) =>
+          p.title.toLowerCase().includes(q) ||
+          p.description.toLowerCase().includes(q),
+      );
+    }
+  }
   function handleSearch(event) {
     event.preventDefault();
     if (searchQuery.trim()) {
-      navigate('search');
-      const newUrl = `/search?q=${encodeURIComponent(searchQuery.trim())}`;
+      navigate("search");
+      const query = searchQuery.trim();
+      const newUrl = query ? `/?q=${encodeURIComponent(query)}` : "/";
+      //const newUrl = `/search?q=${encodeURIComponent(searchQuery.trim())}`;
       window.history.replaceState({}, "", newUrl);
+      applyFilter(query);
     }
   }
   onMount(async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialQuery = urlParams.get("q") || "";
+    if (initialQuery) searchQuery = initialQuery;
     try {
       const res = await fetch("/api/products/");
       if (res.ok) products = await res.json();
+      applyFilter(initialQuery);
     } catch (e) {
       console.error("Failed to load products", e);
     } finally {
@@ -24,30 +43,36 @@
     }
   });
 </script>
- <form
-      class="d-flex mx-auto"
-      style="max-width: 400px;"
-      on:submit={handleSearch}
-    >
-      <input
-        class="form-control me-2"
-        type="search"
-        placeholder="Search products..."
-        aria-label="Search"
-        bind:value={searchQuery}
-        data-testid="search-input"
-      />
-      <button class="btn btn-outline-primary" type="submit">Search</button>
-    </form>
-<h2 class="mb-4">Featured Products</h2>
 
+<form class="d-flex mx-auto" style="max-width: 400px;" on:submit={handleSearch}>
+  <input
+    class="form-control me-2"
+    type="search"
+    placeholder="Search products..."
+    aria-label="Search"
+    bind:value={searchQuery}
+    data-testid="search-input"
+  />
+  <button
+    class="btn btn-outline-primary"
+    type="submit"
+    data-testid="search-button">Search</button
+  >
+</form>
+<h2 class="mb-4">
+  {#if searchQuery}
+    Search Results
+  {:else}
+    Featured Products
+  {/if}
+</h2>
 {#if loading}
   <div class="text-center"><div class="spinner-border"></div></div>
 {:else if products.length === 0}
   <p>No products available.</p>
 {:else}
   <div class="row row-cols-1 row-cols-md-3 g-4">
-    {#each products as product}
+    {#each filteredProducts as product}
       <div class="col">
         <div
           class="card h-100 d-flex flex-column shadow-sm"
@@ -61,7 +86,7 @@
               <button
                 class="btn btn-primary w-100"
                 on:click={() => navigate(`product?id=${product.id}`)}
-                data-testid="add-to-cart-button"
+                data-testid="view-Detail"
               >
                 View Details
               </button>

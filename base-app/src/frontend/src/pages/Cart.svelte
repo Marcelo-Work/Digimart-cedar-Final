@@ -8,7 +8,7 @@
   let couponError = "";
   let applying = false;
   let errorMessage = "";
-  let currentUser = null;
+  export let currentUser = null;
   onMount(async () => {
     if (currentUser) {
       await fetchCart();
@@ -21,12 +21,46 @@
           (sum, item) => sum + item.price * item.quantity,
           0,
         );
-        cart = { items, final_total: total };
+        cart = {
+          items,
+          final_total: total,
+          raw_total: total,
+          discount_amount: 0,
+          applied_coupon: null,
+        };
       } else {
-        cart = { items: [], final_total: 0 };
+        cart = {
+          items: [],
+          final_total: 0,
+          raw_total: 0,
+          discount_amount: 0,
+          applied_coupon: null,
+        };
       }
     }
     loading = false;
+    const handleCartUpdate = async () => {
+      if (currentUser) {
+        await fetchCart(); // Re-fetch from backend
+      } else {
+        // Re-load from localStorage for guests
+        const stored = localStorage.getItem("cart");
+        if (stored) {
+          const items = JSON.parse(stored);
+          const total = items.reduce(
+            (sum, item) => sum + item.price * item.quantity,
+            0,
+          );
+          cart = { items, final_total: total };
+        }
+      }
+    };
+    window.addEventListener("cart-updated", handleCartUpdate);
+
+    // Cleanup on destroy
+    return () => {
+      window.removeEventListener("cart-updated", handleCartUpdate);
+    };
   });
 
   async function fetchCart() {
@@ -51,8 +85,8 @@
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        credentials: "include", 
-        body: JSON.stringify({}), 
+        credentials: "include",
+        body: JSON.stringify({}),
       });
 
       const data = await res.json();
@@ -168,7 +202,7 @@
 
     <!-- Totals -->
     <div class="d-flex justify-content-end flex-column align-items-end">
-      <p>Subtotal: ${cart.raw_total?.toFixed(2)}</p>
+      <p>Subtotal: ${(cart.raw_total || cart.final_total)?.toFixed(2)}</p>
       {#if cart.discount_amount > 0}
         <p class="text-success" data-testid="discount-amount">
           Discount: -${cart.discount_amount.toFixed(2)}

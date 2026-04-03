@@ -6,42 +6,38 @@
   let loggingOut = false;
   const dispatch = createEventDispatcher();
 
-    async function handleLogout() {
-      loggingOut = true;
-      
-      try {
-        const res = await fetch("/api/auth/logout/", {
-          method: "POST",
-          credentials: "include", 
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+  async function handleLogout() {
+    loggingOut = true;
 
-        currentUser = null; 
+    try {
+      const res = await fetch("/api/auth/logout/", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-        localStorage.clear();
+      currentUser = null;
 
-        document.cookie.split(";").forEach(function (c) {
-          document.cookie = c
-            .replace(/^ +/, "")
-            .replace(
-              /=.*/,
-              "=;expires=" + new Date().toUTCString() + ";path=/",
-            );
-        });
+      localStorage.clear();
 
-        navigate("home");
-      } catch (e) {
-        console.error("Logout error:", e);
-        currentUser = null;
-        localStorage.clear();
-        navigate("home");
-      } finally {
-        loggingOut = false;
-      }
+      document.cookie.split(";").forEach(function (c) {
+        document.cookie = c
+          .replace(/^ +/, "")
+          .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+      });
+
+      navigate("home");
+    } catch (e) {
+      console.error("Logout error:", e);
+      currentUser = null;
+      localStorage.clear();
+      navigate("home");
+    } finally {
+      loggingOut = false;
     }
-
+  }
 </script>
 
 <nav
@@ -79,12 +75,21 @@
           >
         </li>
         <li class="nav-item">
-            <a
-              class="nav-link"
-              href="/cart"
-              on:click|preventDefault={() => navigate("cart")}>Cart</a
-            >
-          </li>
+          <a
+            class="nav-link"
+            href="/cart"
+            on:click|preventDefault={() => navigate("cart")}>Cart</a
+          >
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link"
+            href="/profile"
+            on:click|preventDefault={() => navigate("profile")}
+          >
+            Profile
+          </a>
+        </li>
         {#if currentUser && currentUser.role === "vendor"}
           <a
             class="nav-link"
@@ -108,24 +113,13 @@
           >
             Orders
           </a>
-          
+
           <li class="nav-item">
             <a
               class="nav-link"
               href="/support"
               on:click|preventDefault={() => navigate("support")}>Support</a
             >
-          </li>
-        {/if}
-        {#if currentUser}
-          <li class="nav-item">
-            <a
-              class="nav-link"
-              href="/profile"
-              on:click|preventDefault={() => navigate("profile")}
-            >
-              Profile
-            </a>
           </li>
         {/if}
       </ul>
