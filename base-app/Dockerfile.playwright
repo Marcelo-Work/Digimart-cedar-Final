@@ -1,0 +1,17 @@
+
+
+FROM mcr.microsoft.com/playwright:v1.58.2-jammy
+
+WORKDIR /app
+
+COPY base-app/src/frontend/package*.json ./
+RUN npm ci
+
+COPY . .
+
+RUN npx playwright install --with-deps chromium
+
+ENV PLAYWRIGHT_BROWSERS_PATH=/root/.cache/ms-playwright
+ENV VITE_API_BASE_URL=http://backend:3000/api
+
+CMD ["npx", "playwright", "test", "tasks/test-cases/", "--reporter=list"]

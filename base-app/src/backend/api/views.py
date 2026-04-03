@@ -32,8 +32,14 @@ from .authentication import CsrfExemptSessionAuthentication
 
 from .tasks import send_order_confirmation_email
 
+@api_view(['GET'])
+@permission_classes([AllowAny])
 def health_check(request):
-    return JsonResponse({'status': 'healthy'}, status=200)
+    return Response({
+        "status": "healthy",
+        "service": "digimart-cedar",
+        "timestamp": "2026-04-02T12:00:00Z" # Optional static time or use datetime.now()
+    })
 
 @method_decorator(csrf_exempt, name='dispatch')
 class LoginView(APIView):
@@ -610,22 +616,30 @@ class GuestCheckoutView(APIView):
     permission_classes = [permissions.AllowAny] # Anyone can access
     
     def post(self, request):
-        email = request.data.get('email')
-        name = request.data.get('billing_name')
-        address = request.data.get('billing_address')
-        city = request.data.get('billing_city')
-        zip_code = request.data.get('billing_zip')
-        
+        email = request.data.get('email').strip()
+        name = request.data.get('billing_name').strip()
+        address = request.data.get('billing_address').strip()
+        city = request.data.get('billing_city').strip()
+        zip_code = request.data.get('billing_zip').strip()
+        errors = {}
         if not email:
-            return Response({'error': 'Email is required'}, status=400)
+            errors['email'] = 'Email is required'
         try:
             validate_email(email)
         except ValidationError:
-            return Response({'error': 'Invalid email format'}, status=400)
+            errors['email'] = 'Enter a valid email address' 
             
-        if not name or not address or not city or not zip_code:
-            return Response({'error': 'All billing fields are required'}, status=400)
-
+        if not name:
+            errors['billing_name'] = 'Name is required'
+        if not address:
+            errors['billing_address'] = 'Address is required'
+        if not city:
+            errors['billing_city'] = 'City is required'
+        if not zip_code:
+            errors['billing_zip'] = 'ZIP code is required'
+        if errors:
+            print(f"❌ Validation errors: {errors}")
+            return Response({'errors': errors}, status=status.HTTP_400_BAD_REQUEST)
         
         items = request.data.get('items', [])
         if not items:

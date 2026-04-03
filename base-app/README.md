@@ -36,6 +36,7 @@ python manage.py runserver 0.0.0.0:3000
 # Frontend (new terminal)
 cd base-app/src/frontend
 npm install
+npx playwright install
 npm run dev
 
 # Access: http://localhost:5173

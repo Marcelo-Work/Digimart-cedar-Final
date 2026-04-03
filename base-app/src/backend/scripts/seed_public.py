@@ -67,6 +67,7 @@ def seed_data():
         {"title": "Mechanical Gaming Keyboard", "cat": "Electronics", "price": "89.50"},
         {"title": "4K Ultra HD Monitor", "cat": "Electronics", "price": "299.99"},
         {"title": "USB-C Hub Adapter", "cat": "Electronics", "price": "25.99"},
+        {"title": "Private Gaming Mouse", "cat": "Electronics", "price": "49.99"},
         
         # Furniture Category
         {"title": "Ergonomic Office Chair", "cat": "Furniture", "price": "150.00"},

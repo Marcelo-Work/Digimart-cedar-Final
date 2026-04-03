@@ -18,7 +18,7 @@
     }
 
     try {
-      const ordersRes = await fetch('/api/orders/');
+      const ordersRes = await fetch('/api/orders/', {credentials: 'include'});
       if (ordersRes.ok) {
         orders = await ordersRes.json();
       }
@@ -49,9 +49,9 @@
 
   <h3>Order History</h3>
   {#if orders.length === 0}
-    <div class="alert alert-info">No orders found.</div>
+    <div class="alert alert-info" data-testid="no-orders-message">No orders found.</div>
   {:else}
-    <div class="list-group shadow-sm">
+    <div class="list-group shadow-sm" data-testid="order-table">
       {#each orders as order}
         <div class="list-group-item d-flex justify-content-between align-items-center">
           <div>

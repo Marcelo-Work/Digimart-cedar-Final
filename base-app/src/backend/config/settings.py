@@ -124,6 +124,7 @@ CSRF_COOKIE_SAMESITE = 'Lax'
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' 
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@digimart.local')
 # OR use locmem to inspect via code:
 # EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
 # Rate Limiting Setting

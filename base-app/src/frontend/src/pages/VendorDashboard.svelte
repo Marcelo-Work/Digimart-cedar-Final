@@ -145,11 +145,18 @@
                     class="form-control"
                     bind:value={formTitle}
                     required
+                    data-testid="product-title-input"
+                    placeholder="Enter product title"
                 />
             </div>
             <div class="mb-2">
                 <label>Description</label>
-                <textarea class="form-control" bind:value={formDesc} rows="2"
+                <textarea
+                    class="form-control"
+                    bind:value={formDesc}
+                    rows="2"
+                    data-testid="product-desc-input"
+                    placeholder="Enter product description"
                 ></textarea>
             </div>
             <div class="mb-2">
@@ -159,6 +166,8 @@
                     step="0.01"
                     class="form-control"
                     bind:value={formPrice}
+                    data-testid="product-price-input"
+                    placeholder="0.00"
                 />
             </div>
             <div class="mb-2">
@@ -168,16 +177,25 @@
                     class="form-control"
                     bind:value={formUrl}
                     placeholder="https://..."
+                    data-testid="product-url-input"
                 />
             </div>
 
             <div class="mt-3">
-                <button class="btn btn-success me-2" on:click={handleSubmit}>
+                <button
+                    class="btn btn-success me-2"
+                    on:click={handleSubmit}
+                    data-testid={isEditing
+                        ? "update-product-btn"
+                        : "add-product-btn"}
+                >
                     {isEditing ? "Update Product" : "Add Product"}
                 </button>
                 {#if isEditing}
-                    <button class="btn btn-secondary" on:click={resetForm}
-                        >Cancel</button
+                    <button
+                        class="btn btn-secondary"
+                        on:click={resetForm}
+                        data-testid="cancel-edit-btn">Cancel</button
                     >
                 {/if}
             </div>
