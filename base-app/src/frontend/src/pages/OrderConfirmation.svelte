@@ -3,7 +3,6 @@
     export let navigate;
 
     let orderId = null;
-    let orderData = null;
     let loading = true;
 
     onMount(() => {
@@ -19,13 +18,13 @@
     });
 </script>
 
-<div class="container py-5 text-center">
+<div class="container py-5 text-center" data-testid="order-confirmed">
     {#if loading}
         <div class="spinner-border"></div>
     {:else}
         <div
             class="alert alert-success shadow-sm"
-            data-testid="order-confirmed"
+            data-testid="order-success-message"
         >
             <h1 class="display-4">✅ Order Confirmed!</h1>
             <p class="lead">Thank you for your purchase.</p>

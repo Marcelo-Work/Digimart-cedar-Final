@@ -9,7 +9,7 @@
   }
 </script>
 
-<div class="star-rating" data-testid="rating-stars" style="display: inline-block;">
+<div class="star-rating" data-testid="star-rating" style="display: inline-block;">
   {#each Array(maxRating) as _, i}
     <span 
       style="
@@ -18,6 +18,7 @@
         font-size: 1.5rem;
         user-select: none;
       "
+      data-testid="star-{i}"
       on:click={() => clickStar(i + 1)}
       role="button"
       aria-label="{i + 1} Star"

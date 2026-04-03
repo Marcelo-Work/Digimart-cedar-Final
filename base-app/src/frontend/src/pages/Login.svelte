@@ -3,7 +3,7 @@
   export let navigate;
   
   const dispatch = createEventDispatcher();
-  
+
   let email = '';
   let password = '';
   let errorMessage = '';
@@ -22,10 +22,12 @@
         body: JSON.stringify({ email, password })
       });
       
-      const data = await res.json();
       
+      const data = await res.json();
       if (res.ok && data.success) {
+        
         dispatch('login', data.user);
+        navigate('home');
       } else {
         errorMessage = data.error || 'Login failed';
       }
